@@ -1,0 +1,70 @@
+# Model arguments
+model_name_or_path: DeepSeek-R1-Distill-Qwen-1.5B
+model_revision: main
+torch_dtype: bfloat16
+attn_implementation: flash_attention_2
+
+dataset_name: datasets/lamp_5_500
+
+system_prompt: "You are a professional personalized recommendation assistant, capable of accurately inferring user preferences as well as the preferences implied by the current query based on historical records, and the content of the query. You first analyze the user's historical behavior patterns, past expressions of preferences, and the context of the current query, and then combine this information for comprehensive reasoning. You treat the reasoning process as an internal monologue, then provide the answer to the user. Use the following format to reply: <think>\n...\n</think>\n<answer>\n......\n</answer>。"
+
+
+# GRPO trainer config
+bf16: true
+use_vllm: true
+vllm_device: auto
+vllm_gpu_memory_utilization: 0.85
+do_eval: false
+gradient_accumulation_steps: 1
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: false
+hub_model_id: Qwen-1.5B-sft-GRPO
+hub_strategy: every_save
+learning_rate: 1.0e-06
+log_completions: true
+log_level: info
+logging_first_step: true
+logging_steps: 1
+logging_strategy: steps
+lr_scheduler_type: cosine_with_min_lr
+lr_scheduler_kwargs:
+  min_lr_rate: 0.1
+max_prompt_length: 512
+max_completion_length: 768
+max_steps: -1
+num_generations: 4 
+num_train_epochs: 5
+output_dir: data/Qwen-1.5B-lamp5_500_person5
+overwrite_output_dir: true
+per_device_eval_batch_size: 4 
+per_device_train_batch_size: 4 
+push_to_hub: false 
+report_to:
+- wandb
+reward_funcs:
+- accuracy_5
+- format
+- person_5
+- all_format
+- penalty_invalid
+reward_weights:
+- 1.0
+- 0.1
+- 0.1
+- 0
+- 0
+save_strategy: "epoch"
+save_total_limit: 5
+seed: 42
+temperature: 0.7
+warmup_ratio: 0.1
+
+
+peft:
+  use_peft: true         
+  peft_type: lora        
+  r: 16                  
+  alpha: 16              
+  dropout: 0.1           
+  target_modules: all-linear
